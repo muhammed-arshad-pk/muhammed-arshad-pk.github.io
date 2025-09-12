@@ -56,7 +56,7 @@ const ContactSection = () => {
   ];
 
   const socialLinks = [
-    { icon: Github, url: 'https://github.com/muhammed-arshadpk', label: 'GitHub' },
+    { icon: Github, url: 'https://github.com/muhammed-arshad-pk', label: 'GitHub' },
     { icon: Linkedin, url: 'https://www.linkedin.com/in/muhammed-arshad-p-k-691a52281', label: 'LinkedIn' },
     { icon: Twitter, url: 'https://twitter.com', label: 'Twitter' }
   ];

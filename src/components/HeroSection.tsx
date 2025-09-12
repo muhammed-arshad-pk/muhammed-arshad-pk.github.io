@@ -21,7 +21,7 @@ const HeroSection = () => {
               <h1 className="text-5xl md:text-7xl font-bold">
                 <span className="gradient-text">Muhammmed Arshad P K</span>
                 <br />
-                ML Intern & CS Student
+                Computer Vision & AI Developer
               </h1>
               <p className="text-xl text-muted-foreground max-w-lg">
               A third-year Computer Science student and Machine Learning Intern specializing in building intelligent systems. Passionate about applying AI to real-world challenges, with a focus on Computer Vision and Embedded Technologies.
@@ -50,7 +50,7 @@ const HeroSection = () => {
             {/* Social Links */}
             <div className="flex space-x-4">
               <a
-                href="https://github.com"
+                href="https://github.com/muhammed-arshad-pk"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-3 glass-card rounded-full hover:scale-110 transition-transform hover:text-accent"
