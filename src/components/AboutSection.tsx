@@ -60,7 +60,7 @@ const AboutSection = () => {
                 <div className="text-sm text-muted-foreground">Projects Completed</div>
               </div>
               <div className="glass-card p-6 text-center">
-                <div className="text-3xl font-bold gradient-text">~1</div>
+                <div className="text-3xl font-bold gradient-text">1.5</div>
                 <div className="text-sm text-muted-foreground">Years Experience</div>
               </div>
             </div>
