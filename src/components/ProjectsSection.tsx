@@ -3,20 +3,31 @@ import { Button } from '@/components/ui/button';
 import avimage from '../assets/AV.jpg';
 import av2image from '../assets/AV2.jpg';
 import smartflow from '../assets/smartflow.jpg'
-import mnemonic from '../assets/mnemonics-to-opcode.jpg';
-import handwritten from '../assets/handwritten.jpg';
-import facedetection from '../assets/facedetection.jpg';
+// import mnemonic from '../assets/mnemonics-to-opcode.jpg';
+// import handwritten from '../assets/handwritten.jpg';
+// import facedetection from '../assets/facedetection.jpg';
+import carepulseImage from '../assets/carepulse.png';
 
 
 
 const ProjectsSection = () => {
   const projects = [
     {
+      title: 'CarePulse AI: Advanced Wound Analysis for NPWT',
+      description: 'Designed and developed a multimodal clinical decision-support system for automated wound segmentation, tissue classification, and metric area estimation to assist Negative Pressure Wound Therapy (NPWT). The system combines U-Net++ with an EfficientNet-B0 backbone for precise segmentation and integrates RAG-powered LLMs (Gemini 1.5) to generate evidence-based clinical recommendations, reducing inter-observer variability and improving treatment outcomes.',
+      image: carepulseImage, // Your image variable
+      technologies: ['Medical AI', 'Computer Vision', 'U-Net++', 'PyTorch', 'Clinical Decision Support', 'RAG','Gemini API','FastAPI','Healthcare AI'],
+      githubLink: 'https://github.com/muhammed-arshad-pk/CarePulse-AI-System', // Add your GitHub link here
+      liveLink: 'https://huggingface.co/spaces/Arshadpk/wound-Analysis',
+      featured: true,
+      date: 'present'
+    },
+    {
       title: 'MQLC: Multi-Agent RL for Autonomous Driving',
       description: 'Developed and evaluated a collaborative multi-agent Q-learning framework (MQLC) to enable safe and intelligent lane-changing for autonomous vehicles in dense traffic. The model uses a dual Q-network and GCN-GRU for trajectory prediction, significantly improving decision efficiency and safety in simulations.',
       image: avimage, // Your image variable
       technologies: ['Reinforcement Learning', 'Python', 'PyTorch', 'GCN-GRU', 'Multi-Agent Systems', 'highway-env'],
-      githubLink: '#', // Add your GitHub link here
+      githubLink: 'https://github.com/muhammed-arshad-pk/MQLC-Traffic-MARL', // Add your GitHub link here
       featured: true,
       date: '2025'
     },
@@ -25,8 +36,8 @@ const ProjectsSection = () => {
       description: 'Developed a novel machine learning model to improve autonomous vehicle trajectory prediction by accurately identifying human driver intentions. This approach uses a maneuver-aware pooling mechanism, demonstrating significant accuracy improvements over state-of-the-art methods on the NGSIM dataset.',
       image: av2image, // Your image variable
       technologies: ['Machine Learning', 'Python', 'Autonomous Driving', 'Pandas', 'NumPy', 'TensorFlow'],
-      liveLink: '#',
-      githubLink: '#',
+      //liveLink: '#',
+      githubLink: 'https://github.com/muhammed-arshad-pk/Maneuver-Aware-Trajectory-Prediction-for-Autonomous-Vehicles-IoV-',
       featured: true,
       date: '2025'
     },
@@ -35,41 +46,41 @@ const ProjectsSection = () => {
       description: 'Designed and built an end-to-end IoT system for real-time flow monitoring. The project involved developing custom ESP32-based hardware with a local display and a cloud-based dashboard for remote data visualization. Responsibilities included circuit design, sensor interfacing, soldering, and hardware testing.',
       image: smartflow, // The variable for your project image
       technologies: ['IoT', 'ESP32', 'Embedded Systems', 'Circuit Design', 'C/C++', 'Cloud Integration'],
-      liveLink: '#', // Not applicable for a hardware project
-      githubLink: '#', // Add your GitHub repository link here
+      //liveLink: '#', // Not applicable for a hardware project
+      githubLink: 'https://github.com/muhammed-arshad-pk/ESP32-Dual-Flow-Monitoring-System-with-IoT-TFT-Display', // Add your GitHub repository link here
       featured: true,
       date: '2025'
     },
-    {
-      title: 'Mnemonic to Opcode Converter',
-      description: 'A web-based tool that converts assembly language mnemonics into their corresponding opcodes in real-time. Originally a C program, this app was rebuilt for the web with a user-friendly interface that includes syntax validation for mnemonics and addresses. It is designed to be a helpful utility for students and programmers working with low-level code.',
-      image: mnemonic , // The image previously generated for this project
-      technologies: ['JavaScript', 'HTML5', 'CSS3', 'C', 'GitHub Pages'],
-      liveLink: 'https://muhammed-arshadpk.github.io/mnemonic-to-opcode-converter/',
-      githubLink: 'https://github.com/muhammed-arshadpk/mnemonic-to-opcode-converter',
-      featured: true,
-      date: '2025'
-    },
-    {
-      title: 'Handwritten Digit Classifier (CNN)',
-      description: 'As part of my internship at NITK Surathkal, I built and trained a Convolutional Neural Network (CNN) to classify MNIST digits, achieving 99.18% accuracy. The project involved preprocessing data, designing a robust CNN architecture, and successfully testing the model on custom, real-world handwritten images to confirm its practical application.',
-      image: handwritten, // The custom image for this project
-      technologies: ['Python', 'TensorFlow', 'Keras', 'Computer Vision', 'Scikit-learn', 'NumPy'],
-      liveLink: '#',
-      githubLink: '#', // Add your GitHub repository link here
-      featured: false,
-      date: '2024'
-    },
-    {
-      title: 'Sports Personality Classifier',
-      description: 'Developed a Convolutional Neural Network (CNN) to identify sports personalities from images. This foundational project, part of my internship at NITK Surathkal, was built using TensorFlow and Keras to gain hands-on experience in data preprocessing, model training, and feature extraction for deep learning applications.',
-      image: facedetection, // Your image variable
-      technologies: ['Python', 'TensorFlow', 'Keras', 'CNNs', 'Computer Vision'],
-      liveLink: '#',
-      githubLink: '#', // Add your GitHub repository link here
-      featured: false,
-      date: '2024'
-    },
+    // {
+    //   title: 'Mnemonic to Opcode Converter',
+    //   description: 'A web-based tool that converts assembly language mnemonics into their corresponding opcodes in real-time. Originally a C program, this app was rebuilt for the web with a user-friendly interface that includes syntax validation for mnemonics and addresses. It is designed to be a helpful utility for students and programmers working with low-level code.',
+    //   image: mnemonic , // The image previously generated for this project
+    //   technologies: ['JavaScript', 'HTML5', 'CSS3', 'C', 'GitHub Pages'],
+    //   liveLink: 'https://muhammed-arshadpk.github.io/mnemonic-to-opcode-converter/',
+    //   githubLink: 'https://github.com/muhammed-arshadpk/mnemonic-to-opcode-converter',
+    //   featured: true,
+    //   date: '2025'
+    // },
+    // {
+    //   title: 'Handwritten Digit Classifier (CNN)',
+    //   description: 'As part of my internship at NITK Surathkal, I built and trained a Convolutional Neural Network (CNN) to classify MNIST digits, achieving 99.18% accuracy. The project involved preprocessing data, designing a robust CNN architecture, and successfully testing the model on custom, real-world handwritten images to confirm its practical application.',
+    //   image: handwritten, // The custom image for this project
+    //   technologies: ['Python', 'TensorFlow', 'Keras', 'Computer Vision', 'Scikit-learn', 'NumPy'],
+    //   liveLink: '#',
+    //   githubLink: '#', // Add your GitHub repository link here
+    //   featured: false,
+    //   date: '2024'
+    // },
+    // {
+    //   title: 'Sports Personality Classifier',
+    //   description: 'Developed a Convolutional Neural Network (CNN) to identify sports personalities from images. This foundational project, part of my internship at NITK Surathkal, was built using TensorFlow and Keras to gain hands-on experience in data preprocessing, model training, and feature extraction for deep learning applications.',
+    //   image: facedetection, // Your image variable
+    //   technologies: ['Python', 'TensorFlow', 'Keras', 'CNNs', 'Computer Vision'],
+    //   liveLink: '#',
+    //   githubLink: '#', // Add your GitHub repository link here
+    //   featured: false,
+    //   date: '2024'
+    // },
   ];
 
   const featuredProjects = projects.filter(project => project.featured);
