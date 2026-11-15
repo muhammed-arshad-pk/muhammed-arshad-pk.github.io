@@ -111,13 +111,15 @@ export default function Hero() {
           <p className="max-w-xl text-base leading-relaxed text-muted sm:text-lg md:mt-6">{profile.tagline}</p>
 
           <div className="mt-7 flex flex-wrap items-center gap-3 sm:mt-9">
-            <a href="#work" className="btn btn-solid flex-1 justify-center sm:flex-none">
-              See the work <ArrowUpRight size={17} />
-            </a>
-            <a href="#contact" className="btn btn-ghost flex-1 justify-center sm:flex-none">
-              Let's talk
-            </a>
-            <div className="flex items-center gap-1">
+            <div className="grid w-full grid-cols-2 gap-3 sm:flex sm:w-auto">
+              <a href="#work" className="btn btn-solid justify-center !px-4 sm:!px-6">
+                See the work <ArrowUpRight size={17} className="shrink-0" />
+              </a>
+              <a href="#contact" className="btn btn-ghost justify-center !px-4 sm:!px-6">
+                Let's talk
+              </a>
+            </div>
+            <div className="-ml-2 flex items-center gap-1 sm:ml-0">
               <a href={profile.github} target="_blank" rel="noopener" aria-label="GitHub" className="grid h-11 w-11 place-items-center rounded-full text-muted transition hover:text-fg">
                 <Github size={19} />
               </a>

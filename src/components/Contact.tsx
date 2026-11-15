@@ -119,7 +119,7 @@ export default function Contact() {
         </div>
       </Section>
 
-      <footer className="border-t hairline px-4 pb-32 pt-8 sm:px-6 lg:pb-8">
+      <footer className="border-t hairline px-4 pt-8 pb-[calc(2rem+env(safe-area-inset-bottom))] sm:px-6">
         <div className="mx-auto flex max-w-page flex-col items-center justify-between gap-4 text-sm text-muted sm:flex-row">
           <div className="flex items-center gap-3 text-fg">
             <Logo />
