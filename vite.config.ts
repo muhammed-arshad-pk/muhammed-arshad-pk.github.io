@@ -1,16 +1,20 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-// No longer need to import React here for the config file
 
-// https://vitejs.dev/config/
+// GitHub Pages serves this site from the `docs/` folder on `main`,
+// so the production build is written straight there.
 export default defineConfig({
   base: '/',
+  build: {
+    outDir: "docs",
+    emptyOutDir: true,
+  },
   server: {
     host: "::",
     port: 8080,
   },
-  plugins: [react()], // The tagger has been removed from this array
+  plugins: [react()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
