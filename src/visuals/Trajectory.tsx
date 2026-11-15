@@ -1,10 +1,17 @@
-import { useCanvasLoop, rgba, roundRect } from "@/lib/canvas";
+import { useRef } from "react";
+import { useCanvasLoop, rgba, roundRect, localPoint } from "@/lib/canvas";
 
 const T = 9; // loop seconds
 const sig = (x: number) => 1 / (1 + Math.exp(-x));
 
 export default function Trajectory() {
-  const ref = useCanvasLoop((ctx, t, w, h, c) => {
+  const offset = useRef(0); // time shift applied by scrubbing
+  const tNow = useRef(0);
+  const dragging = useRef(false);
+
+  const { ref, redraw } = useCanvasLoop((ctx, t0, w, h, c) => {
+    tNow.current = t0;
+    const t = t0 + offset.current;
     const laneH = Math.min(h * 0.22, 80, (h - 112) / 3);
     const top = Math.max((h - laneH * 3) / 2 + 6, 74);
     const laneY = (l: number) => top + laneH * (l + 0.5);
@@ -12,7 +19,7 @@ export default function Trajectory() {
     const px = (s: number) => w * (0.04 + s * 0.92);
     const py = (s: number) => laneY(1) - laneH * sig((s - 0.55) * 18);
 
-    const sNow = 0.12 + ((t % T) / T) * 0.62;
+    const sNow = 0.12 + ((((t % T) + T) % T) / T) * 0.62;
     const hist = 0.14, horizon = 0.24;
 
     // road
@@ -115,5 +122,25 @@ export default function Trajectory() {
     ctx.fillText("- - 5 s predicted", 128, h - 14);
   });
 
-  return <canvas ref={ref} className="absolute inset-0 h-full w-full" role="img" aria-label="Animated trajectory forecast predicting a driver's lane change" />;
+  const scrubTo = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const p = localPoint(e);
+    // map pointer x onto the car's position along the road (s = 0.12…0.74)
+    const s = (p.x / p.w - 0.04) / 0.92;
+    const f = Math.min(1, Math.max(0, (s - 0.12) / 0.62));
+    offset.current = f * T - tNow.current;
+    redraw();
+  };
+
+  return (
+    <canvas
+      ref={ref}
+      className="absolute inset-0 h-full w-full cursor-ew-resize touch-pan-y"
+      role="img"
+      aria-label="Interactive trajectory forecast: drag sideways to scrub the car through time and watch the predicted manoeuvre change"
+      onPointerDown={(e) => { dragging.current = true; e.currentTarget.setPointerCapture(e.pointerId); scrubTo(e); }}
+      onPointerMove={(e) => { if (dragging.current) scrubTo(e); }}
+      onPointerUp={() => { dragging.current = false; }}
+      onPointerCancel={() => { dragging.current = false; }}
+    />
+  );
 }

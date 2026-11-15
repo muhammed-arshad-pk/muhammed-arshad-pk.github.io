@@ -1,6 +1,6 @@
 import { GraduationCap, MapPin, Sparkles } from "lucide-react";
 import { education, metrics, profile } from "@/data";
-import { Reveal, Section, SectionHead } from "./ui";
+import { CountUp, Reveal, Section, SectionHead } from "./ui";
 import walk from "@/assets/img/walk.webp";
 
 const stack = ["YOLO11", "U-Net", "PyTorch", "OpenCV", "LangChain", "RAG", "Gemini", "MARL", "GCN-GRU", "LSTM", "FastAPI", "Docker", "ESP32", "TensorFlow"];
@@ -88,7 +88,9 @@ export default function About() {
       <div className="mt-20 grid grid-cols-2 border-l border-t hairline lg:grid-cols-4">
         {metrics.map((m, i) => (
           <Reveal key={m.label} delay={i * 0.06} className="border-b border-r hairline p-4 sm:p-8">
-            <p className="whitespace-nowrap font-display text-[1.7rem] font-semibold tracking-tight sm:text-4xl md:text-5xl">{m.value}</p>
+            <p className="whitespace-nowrap font-display text-[1.7rem] font-semibold tabular-nums tracking-tight sm:text-4xl md:text-5xl">
+              <CountUp value={m.value} />
+            </p>
             <p className="mt-3 text-sm text-fg">{m.label}</p>
             <p className="mt-1 font-mono text-[11px] text-muted">{m.note}</p>
           </Reveal>

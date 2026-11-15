@@ -3,6 +3,8 @@ import type { Config } from "tailwindcss";
 export default {
   darkMode: ["class"],
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
+  // `hover:` utilities only apply on devices that can really hover (no sticky hover after a tap)
+  future: { hoverOnlyWhenSupported: true },
   theme: {
     extend: {
       colors: {

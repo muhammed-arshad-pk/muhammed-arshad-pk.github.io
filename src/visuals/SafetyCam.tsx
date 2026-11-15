@@ -1,17 +1,25 @@
-import { useCanvasLoop, rgba, tag } from "@/lib/canvas";
+import { useRef } from "react";
+import { useCanvasLoop, rgba, tag, localPoint } from "@/lib/canvas";
 
-const workers = [
-  // x0 is a fraction of the wrap span so workers stay spread out at any width
-  { z: 0.15, x0: 0.12, v: 18, helmet: true, vest: true },
-  { z: 0.45, x0: 0.62, v: -14, helmet: false, vest: true },
-  { z: 0.7, x0: 0.36, v: 11, helmet: true, vest: false },
-  { z: 0.95, x0: 0.86, v: -20, helmet: true, vest: true },
+type Worker = { z: number; x0: number; v: number; helmet: boolean; vest: boolean; flash: number };
+
+// x0 is a fraction of the wrap span so workers stay spread out at any width
+const initial: Worker[] = [
+  { z: 0.15, x0: 0.12, v: 18, helmet: true, vest: true, flash: -9 },
+  { z: 0.45, x0: 0.62, v: -14, helmet: false, vest: true, flash: -9 },
+  { z: 0.7, x0: 0.36, v: 11, helmet: true, vest: false, flash: -9 },
+  { z: 0.95, x0: 0.86, v: -20, helmet: true, vest: true, flash: -9 },
 ];
 
 export default function SafetyCam() {
-  const ref = useCanvasLoop((ctx, t, w, h, c) => {
+  const workers = useRef<Worker[]>(initial.map((w) => ({ ...w })));
+  const hits = useRef<{ i: number; x: number; y: number; w: number; h: number }[]>([]);
+  const now = useRef(0);
+
+  const { ref, redraw } = useCanvasLoop((ctx, t, w, h, c) => {
+    now.current = t;
+    hits.current = [];
     const horizon = h * 0.38;
-    // sky / wall
     const g = ctx.createLinearGradient(0, 0, 0, h);
     g.addColorStop(0, rgba(c.surface, 1));
     g.addColorStop(1, rgba(c.bg, 1));
@@ -42,27 +50,25 @@ export default function SafetyCam() {
     }
 
     let ok = 0;
-    for (const wk of workers) {
+    const list = workers.current;
+    for (let i = 0; i < list.length; i++) {
+      const wk = list[i];
       const s = (0.8 + wk.z * 1.1) * Math.min(1.2, Math.max(0.7, h / 420));
       const span = w + 120;
       const x = ((((wk.x0 * span + wk.v * t) % span) + span) % span) - 60;
       const base = horizon + 18 + wk.z * (h - horizon - 40);
       const bodyH = 46 * s, headR = 7 * s, bw = 18 * s;
-      const top = base - bodyH - headR * 2 - 18 * s;
       const step = Math.sin(t * 6 + wk.x0 * 40) * 5 * s;
 
-      // legs
       ctx.strokeStyle = rgba(c.fg, 0.55); ctx.lineWidth = 3.2 * s; ctx.lineCap = "round";
       ctx.beginPath(); ctx.moveTo(x - 3 * s, base - 18 * s); ctx.lineTo(x - 3 * s + step, base); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(x + 3 * s, base - 18 * s); ctx.lineTo(x + 3 * s - step, base); ctx.stroke();
-      // torso
       ctx.fillStyle = wk.vest ? "rgb(249,115,22)" : rgba(c.fg, 0.45);
       ctx.fillRect(x - bw / 2, base - 18 * s - bodyH * 0.62, bw, bodyH * 0.62);
       if (wk.vest) {
         ctx.fillStyle = "rgba(255,255,255,0.85)";
         ctx.fillRect(x - bw / 2, base - 18 * s - bodyH * 0.32, bw, 2.2 * s);
       }
-      // head
       const hy = base - 18 * s - bodyH * 0.62 - headR - 2 * s;
       ctx.fillStyle = rgba(c.fg, 0.6);
       ctx.beginPath(); ctx.arc(x, hy, headR, 0, Math.PI * 2); ctx.fill();
@@ -77,6 +83,16 @@ export default function SafetyCam() {
       if (x < 10 || x > w - 10) continue; // only box workers fully in frame
       const col = compliant ? c.leaf : c.danger;
       const bx = x - bw / 2 - 8 * s, by = hy - headR - 8 * s, bwid = bw + 16 * s, bh = base - by + 4;
+      hits.current.push({ i, x: bx, y: by, w: bwid, h: bh });
+
+      // flash ring right after a tap
+      const age = t - wk.flash;
+      if (age >= 0 && age < 0.6) {
+        ctx.strokeStyle = rgba(col, 1 - age / 0.6);
+        ctx.lineWidth = 2;
+        const grow = age * 30;
+        ctx.strokeRect(bx - grow, by - grow, bwid + grow * 2, bh + grow * 2);
+      }
       ctx.strokeStyle = rgba(col, 0.95); ctx.lineWidth = 1.5;
       ctx.strokeRect(bx, by, bwid, bh);
       const conf = (0.88 + 0.08 * Math.sin(t * 1.3 + wk.x0 * 40)).toFixed(2);
@@ -84,7 +100,6 @@ export default function SafetyCam() {
       tag(ctx, label, Math.min(Math.max(2, bx - 0.75), w - 96), by, rgba(col, 0.95));
     }
 
-    // HUD
     ctx.font = '500 11px "JetBrains Mono", monospace';
     ctx.fillStyle = rgba(c.fg, 0.8);
     ctx.fillText("CAM_03 · YOLO11 · 31 FPS", 14, 22);
@@ -92,9 +107,30 @@ export default function SafetyCam() {
     ctx.beginPath(); ctx.arc(w - 50, 18, 4, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = rgba(c.fg, 0.8);
     ctx.fillText("REC", w - 40, 22);
-    ctx.fillStyle = rgba(c.muted, 1);
-    ctx.fillText(`compliant ${ok}/${workers.length}  ·  alerts ${workers.length - ok}`, 14, h - 14);
+    ctx.fillStyle = ok === list.length ? rgba(c.leaf, 1) : rgba(c.muted, 1);
+    ctx.fillText(`compliant ${ok}/${list.length}  ·  alerts ${list.length - ok}`, 14, h - 14);
   });
 
-  return <canvas ref={ref} className="absolute inset-0 h-full w-full" aria-label="Animated illustration of a CCTV feed detecting PPE compliance on workers" role="img" />;
+  const onPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const p = localPoint(e);
+    const pad = 14; // generous touch target
+    const hit = [...hits.current].reverse().find((b) => p.x > b.x - pad && p.x < b.x + b.w + pad && p.y > b.y - pad && p.y < b.y + b.h + pad);
+    if (!hit) return;
+    const wk = workers.current[hit.i];
+    // Tap cycles: remove helmet → fix everything → back
+    if (wk.helmet && wk.vest) wk.helmet = false;
+    else { wk.helmet = true; wk.vest = true; }
+    wk.flash = now.current;
+    redraw();
+  };
+
+  return (
+    <canvas
+      ref={ref}
+      onPointerDown={onPointerDown}
+      className="absolute inset-0 h-full w-full cursor-pointer touch-manipulation"
+      role="img"
+      aria-label="Interactive CCTV illustration: tap a worker to toggle their PPE and see the detector react"
+    />
+  );
 }

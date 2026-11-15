@@ -1,8 +1,8 @@
 import { useRef } from "react";
-import { useCanvasLoop, rgba, roundRect } from "@/lib/canvas";
+import { useCanvasLoop, rgba, roundRect, localPoint } from "@/lib/canvas";
 
 const LANES = 4;
-type Car = { x: number; lane: number; laneF: number; vr: number; agent: boolean; id: number; timer: number };
+type Car = { x: number; lane: number; laneF: number; vr: number; agent: boolean; id: number; timer: number; born?: number };
 
 function init(w: number): Car[] {
   const cars: Car[] = [];
@@ -23,8 +23,9 @@ const blocked = (cars: Car[], self: Car, lane: number, gap: number) =>
 
 export default function Highway() {
   const sim = useRef<{ cars: Car[]; last: number; w: number; dash: number } | null>(null);
+  const geo = useRef({ roadTop: 0, laneH: 1 });
 
-  const ref = useCanvasLoop((ctx, t, w, h, c) => {
+  const { ref, redraw } = useCanvasLoop((ctx, t, w, h, c) => {
     if (!sim.current || Math.abs(sim.current.w - w) > 40) sim.current = { cars: init(w), last: t, w, dash: 0 };
     const S = sim.current;
     const dt = Math.min(Math.max(t - S.last, 0), 0.05);
@@ -32,6 +33,7 @@ export default function Highway() {
 
     const laneH = Math.min(h * 0.19, 68, (h - 84) / LANES);
     const roadTop = (h - laneH * LANES) / 2 + 8;
+    geo.current = { roadTop, laneH };
     const laneY = (l: number) => roadTop + laneH * (l + 0.5);
     const carW = Math.min(38, w * 0.07), carH = laneH * 0.5;
 
@@ -50,7 +52,7 @@ export default function Highway() {
       } else {
         const agentBehind = S.cars.some((o) => o.agent && Math.round(o.laneF) === car.lane && car.x > o.x && car.x - o.x < carW * 1.4);
         car.x += (agentBehind ? 10 : car.vr) * dt;
-        if (car.x < -carW * 2) {
+        if (car.born === undefined && car.x < -carW * 2) {
           car.x = w + carW * 2 + ((car.vr * 13) % 60);
           const l = Math.abs(Math.floor(t * 3 + car.vr)) % LANES;
           car.lane = l; car.laneF = l;
@@ -59,6 +61,8 @@ export default function Highway() {
       const d = car.lane - car.laneF;
       car.laneF += Math.sign(d) * Math.min(Math.abs(d), dt * 1.4);
     }
+    // user-dropped cars leave for good once they pass off-screen
+    S.cars = S.cars.filter((car) => car.born === undefined || car.x > -carW * 2);
 
     // --- draw road ---
     ctx.fillStyle = rgba(c.surface, 1);
@@ -106,6 +110,17 @@ export default function Highway() {
         ctx.fillStyle = "rgba(0,0,0,0.75)";
         ctx.font = '600 9px "JetBrains Mono", monospace';
         ctx.fillText(`A${car.id}`, -7, 3);
+      } else if (car.born !== undefined) {
+        ctx.fillStyle = rgba(c.marigold, 0.25);
+        ctx.fill();
+        ctx.strokeStyle = rgba(c.marigold, 1);
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        const age = S.last - car.born;
+        if (age < 0.7) {
+          ctx.strokeStyle = rgba(c.marigold, 1 - age / 0.7);
+          ctx.beginPath(); ctx.arc(0, 0, 10 + age * 50, 0, Math.PI * 2); ctx.stroke();
+        }
       } else {
         ctx.strokeStyle = rgba(c.muted, 0.8);
         ctx.lineWidth = 1.2;
@@ -136,5 +151,30 @@ export default function Highway() {
     }
   });
 
-  return <canvas ref={ref} className="absolute inset-0 h-full w-full" role="img" aria-label="Animated simulation of five cooperating autonomous cars changing lanes" />;
+  const onPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const S = sim.current;
+    if (!S) return;
+    const p = localPoint(e);
+    const { roadTop, laneH } = geo.current;
+    const lane = Math.floor((p.y - roadTop) / laneH);
+    if (lane < 0 || lane >= LANES) return;
+    if (S.cars.filter((c) => c.born !== undefined).length >= 4) {
+      const oldest = S.cars.find((c) => c.born !== undefined);
+      if (oldest) S.cars.splice(S.cars.indexOf(oldest), 1);
+    }
+    // Drop a slow car ahead of the tap so the agents have to react
+    const x = Math.min(p.w - 20, Math.max(p.x + 40, 40));
+    S.cars.push({ x, lane, laneF: lane, vr: -55, agent: false, id: 0, timer: 0, born: S.last });
+    redraw();
+  };
+
+  return (
+    <canvas
+      ref={ref}
+      onPointerDown={onPointerDown}
+      className="absolute inset-0 h-full w-full cursor-crosshair touch-manipulation"
+      role="img"
+      aria-label="Interactive simulation of five cooperating autonomous cars: tap a lane to drop in a slow car"
+    />
+  );
 }

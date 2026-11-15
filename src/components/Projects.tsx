@@ -1,9 +1,9 @@
 import { useState, type ComponentType } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowUpRight, Github, Plus, Minus } from "lucide-react";
+import { ArrowUpRight, Github, Plus, Minus, Hand } from "lucide-react";
 import clsx from "clsx";
 import { projects, type Project } from "@/data";
-import { Reveal, Section, SectionHead } from "./ui";
+import { CountUp, Reveal, Section, SectionHead } from "./ui";
 import SafetyCam from "@/visuals/SafetyCam";
 import WoundSeg from "@/visuals/WoundSeg";
 import Highway from "@/visuals/Highway";
@@ -23,11 +23,15 @@ function ProjectRow({ p, flip }: { p: Project; flip: boolean }) {
   const Visual = visuals[p.id];
 
   return (
-    <article className="grid items-center gap-8 lg:grid-cols-12 lg:gap-14">
+    <article id={`project-${p.id}`} className="grid scroll-mt-24 items-center gap-8 lg:grid-cols-12 lg:gap-14">
       <Reveal className={clsx("lg:col-span-7", flip && "lg:order-2")}>
-        <div className="group relative aspect-[16/11] overflow-hidden rounded-[24px] border hairline bg-surface sm:aspect-[16/10]">
+        <div className="group relative aspect-[4/3] overflow-hidden rounded-[20px] border hairline bg-surface sm:aspect-[16/10] sm:rounded-[24px]">
           <Visual />
         </div>
+        <p className="mt-3 flex items-center gap-2 font-mono text-[11px] text-muted">
+          <Hand size={13} className="shrink-0 text-marigold" />
+          {p.hint}
+        </p>
       </Reveal>
 
       <Reveal delay={0.08} className={clsx("lg:col-span-5", flip && "lg:order-1")}>
@@ -49,7 +53,9 @@ function ProjectRow({ p, flip }: { p: Project; flip: boolean }) {
           {p.metrics.map((m) => (
             <div key={m.label} className="border-l hairline pl-3">
               <dt className="sr-only">{m.label}</dt>
-              <dd className="font-display text-xl font-semibold tracking-tight md:text-2xl">{m.value}</dd>
+              <dd className="font-display text-xl font-semibold tabular-nums tracking-tight md:text-2xl">
+                <CountUp value={m.value} />
+              </dd>
               <dd className="mt-1 text-[11px] leading-tight text-muted">{m.label}</dd>
             </div>
           ))}
@@ -58,7 +64,7 @@ function ProjectRow({ p, flip }: { p: Project; flip: boolean }) {
         <button
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
-          className="mt-8 flex w-full items-center justify-between border-y hairline py-3.5 text-left text-sm text-fg transition hover:text-ice"
+          className="mt-8 flex min-h-[48px] w-full items-center justify-between border-y hairline py-3.5 text-left text-sm text-fg transition hover:text-ice"
         >
           How it works
           {open ? <Minus size={16} /> : <Plus size={16} />}
@@ -118,9 +124,9 @@ export default function Projects() {
             <br className="hidden md:block" /> the notebook.
           </>
         }
-        aside={<p>Every visual here is a live, code-drawn sketch of how the system behaves. Toggle the wound masks, watch the agents negotiate lanes.</p>}
+        aside={<p>Every visual here is a live, code-drawn sketch of how the system behaves, and every one responds to touch. Go ahead and poke them.</p>}
       />
-      <div className="space-y-28 md:space-y-40">
+      <div className="space-y-24 md:space-y-40">
         {projects.map((p, i) => (
           <ProjectRow key={p.id} p={p} flip={i % 2 === 1} />
         ))}

@@ -45,7 +45,7 @@ export default function Contact() {
   ];
 
   const field =
-    "w-full rounded-xl border hairline bg-bg/60 px-4 py-3 text-fg placeholder:text-muted/70 outline-none transition focus:border-ice/60";
+    "w-full rounded-xl border hairline bg-bg/60 px-4 py-3 text-base text-fg placeholder:text-muted/70 outline-none transition focus:border-ice/60";
 
   return (
     <>
@@ -69,7 +69,7 @@ export default function Contact() {
               Vision systems, applied ML research, or something that needs a model and a soldering iron. My inbox is open.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <a href={`mailto:${profile.email}`} className="break-all font-display text-xl font-semibold underline decoration-fg/20 underline-offset-8 transition hover:decoration-ice sm:text-2xl">
+              <a href={`mailto:${profile.email}`} className="inline-block break-all py-2 font-display text-xl font-semibold underline decoration-fg/20 underline-offset-8 transition hover:decoration-ice sm:text-2xl">
                 {profile.email}
               </a>
               <button onClick={copy} className="grid h-10 w-10 place-items-center rounded-full border hairline text-muted transition hover:text-fg" aria-label="Copy email address">
@@ -119,7 +119,7 @@ export default function Contact() {
         </div>
       </Section>
 
-      <footer className="border-t hairline px-4 py-8 sm:px-6">
+      <footer className="border-t hairline px-4 pb-32 pt-8 sm:px-6 lg:pb-8">
         <div className="mx-auto flex max-w-page flex-col items-center justify-between gap-4 text-sm text-muted sm:flex-row">
           <div className="flex items-center gap-3 text-fg">
             <Logo />
@@ -128,7 +128,7 @@ export default function Contact() {
           <p className="font-mono text-xs">
             {time} IST · {profile.location}
           </p>
-          <a href="#top" className="font-mono text-xs transition hover:text-fg">BACK TO TOP ↑</a>
+          <a href="#top" className="inline-flex min-h-[44px] items-center px-2 font-mono text-xs transition hover:text-fg">BACK TO TOP ↑</a>
         </div>
       </footer>
     </>

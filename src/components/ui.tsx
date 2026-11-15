@@ -1,6 +1,44 @@
-import { motion } from "framer-motion";
-import type { ReactNode } from "react";
+import { motion, useInView } from "framer-motion";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import clsx from "clsx";
+
+// Numbers not glued to a letter (so "YOLO11" stays as-is, "2.4×" animates).
+// Checked manually instead of a regex lookbehind, which older iOS Safari can't parse.
+const NUM = /\d+(?:\.\d+)?/g;
+const gluedToWord = (s: string, i: number) => i > 0 && /[A-Za-z]/.test(s[i - 1]);
+
+/** Counts every number in a label (e.g. "98–99%", "±1–2%") up from zero when scrolled into view. */
+export function CountUp({ value, className }: { value: string; className?: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-40px" });
+  const [p, setP] = useState(0);
+
+  useEffect(() => {
+    if (!inView) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setP(1); return; }
+    let raf = 0;
+    const start = performance.now();
+    const tick = (now: number) => {
+      const k = Math.min(1, (now - start) / 1300);
+      setP(1 - Math.pow(1 - k, 3));
+      if (k < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [inView]);
+
+  const text = value.replace(NUM, (m, i: number) => {
+    if (gluedToWord(value, i)) return m;
+    const dec = m.includes(".") ? m.split(".")[1].length : 0;
+    return (parseFloat(m) * p).toFixed(dec);
+  });
+
+  return (
+    <span ref={ref} className={className} aria-label={value}>
+      <span aria-hidden>{text}</span>
+    </span>
+  );
+}
 
 export function Reveal({ children, delay = 0, className }: { children: ReactNode; delay?: number; className?: string }) {
   return (
@@ -36,7 +74,7 @@ export function SectionHead({ index, label, title, aside }: { index: string; lab
 
 export function Section({ id, children, className }: { id: string; children: ReactNode; className?: string }) {
   return (
-    <section id={id} className={clsx("relative scroll-mt-20 px-4 py-24 sm:px-6 md:py-36", className)}>
+    <section id={id} className={clsx("relative scroll-mt-16 px-4 py-20 sm:px-6 md:scroll-mt-20 md:py-36", className)}>
       <div className="mx-auto max-w-page">{children}</div>
     </section>
   );

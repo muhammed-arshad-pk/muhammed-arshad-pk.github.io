@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useCanvasLoop, rgba } from "@/lib/canvas";
+import { useRef, useState } from "react";
+import { useCanvasLoop, rgba, localPoint } from "@/lib/canvas";
 import clsx from "clsx";
 
 type Mode = "raw" | "overlay" | "mask";
@@ -30,9 +30,15 @@ function blob(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number, 
 
 export default function WoundSeg() {
   const [mode, setMode] = useState<Mode>("overlay");
+  // Fraction 0..1 set by dragging; holds briefly after release, then auto-sweep resumes.
+  const scrub = useRef<{ f: number; until: number } | null>(null);
+  const tNow = useRef(0);
 
-  const ref = useCanvasLoop((ctx, t, w, h, c) => {
-    const cx = w / 2, cy = h / 2 + 6, R = Math.min(w, h) * 0.26;
+  const { ref, redraw } = useCanvasLoop((ctx, t, w, h, c) => {
+    tNow.current = t;
+    // Sit the wound a little high and smaller on phones so the legend never covers it
+    const narrow = w < 520;
+    const cx = w / 2, cy = narrow ? h * 0.45 : h / 2 + 6, R = Math.min(w, h) * (narrow ? 0.22 : 0.26);
     const layers = [
       { r: R * 1.12, seed: 1.3, dx: 0, dy: 0, ti: 0 },
       { r: R * 0.92, seed: 2.2, dx: 0, dy: 0, ti: 1 },
@@ -81,7 +87,9 @@ export default function WoundSeg() {
       drawRaw();
       if (mode === "overlay") {
         // inference sweep reveals the predicted mask
-        const sweep = ((t * 0.35) % 1.4) * w;
+        const s = scrub.current;
+        if (s && t > s.until) scrub.current = null;
+        const sweep = scrub.current ? scrub.current.f * w : ((t * 0.35) % 1.4) * w;
         ctx.save();
         ctx.beginPath(); ctx.rect(0, 0, sweep, h); ctx.clip();
         drawMask(0.55);
@@ -103,16 +111,34 @@ export default function WoundSeg() {
     ctx.fillText(label, w - ctx.measureText(label).width - 14, h - 14);
   });
 
+  const dragging = useRef(false);
+  const setScrub = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const p = localPoint(e);
+    scrub.current = { f: Math.min(1, Math.max(0, p.x / p.w)), until: tNow.current + 2.5 };
+    if (mode !== "overlay") setMode("overlay");
+    redraw();
+  };
+
   return (
     <>
-      <canvas ref={ref} className="absolute inset-0 h-full w-full" role="img" aria-label="Illustrative wound segmentation with tissue classes" />
+      <canvas
+        ref={ref}
+        className="absolute inset-0 h-full w-full cursor-ew-resize touch-pan-y"
+        role="img"
+        aria-label="Illustrative wound segmentation: drag across the image to reveal the predicted tissue mask"
+        onPointerDown={(e) => { dragging.current = true; e.currentTarget.setPointerCapture(e.pointerId); setScrub(e); }}
+        onPointerMove={(e) => { if (dragging.current) setScrub(e); }}
+        onPointerUp={() => { dragging.current = false; }}
+        onPointerCancel={() => { dragging.current = false; }}
+      />
       <div className="absolute right-3 top-3 flex gap-1 rounded-full bg-black/55 p-1 backdrop-blur">
         {(["raw", "overlay", "mask"] as Mode[]).map((m) => (
           <button
             key={m}
-            onClick={() => setMode(m)}
+            onClick={() => { setMode(m); scrub.current = null; }}
+            aria-pressed={mode === m}
             className={clsx(
-              "rounded-full px-3 py-1 font-mono text-[11px] transition",
+              "min-h-[40px] min-w-[44px] rounded-full px-3 py-1 font-mono text-[11px] transition",
               mode === m ? "bg-white text-black" : "text-white/70 hover:text-white",
             )}
           >

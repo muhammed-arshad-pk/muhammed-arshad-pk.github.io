@@ -6,7 +6,7 @@ export const profile = {
   last: "Arshad",
   role: "Computer Vision & AI Engineer",
   company: "Evolve Safety Consultive",
-  location: "Puducherry, India",
+  location: "Chennai, India",
   email: "arshadmhd004@gmail.com",
   phone: "+91 73568 46528",
   phoneHref: "tel:+917356846528",
@@ -109,11 +109,14 @@ export type Project = {
   github?: string;
   live?: string;
   status?: string;
+  /** Tells visitors how to interact with the live visual. */
+  hint: string;
 };
 
 export const projects: Project[] = [
   {
     id: "wound",
+    hint: "Drag across the image to reveal the mask, or switch views.",
     index: "01",
     title: "CarePulse AI",
     kicker: "Wound analysis & NPWT decision support",
@@ -136,6 +139,7 @@ export const projects: Project[] = [
   },
   {
     id: "mqlc",
+    hint: "Tap a lane to drop in a slow car and watch the agents react.",
     index: "02",
     title: "MQLC",
     kicker: "Multi-agent RL for cooperative lane changing",
@@ -157,6 +161,7 @@ export const projects: Project[] = [
   },
   {
     id: "trajectory",
+    hint: "Drag sideways to scrub time and watch the intent shift.",
     index: "03",
     title: "Driver Intention Prediction",
     kicker: "Manoeuvre-aware trajectory forecasting",
@@ -179,6 +184,7 @@ export const projects: Project[] = [
   },
   {
     id: "flow",
+    hint: "Hold the button to open the valve.",
     index: "04",
     title: "Smart Flow Monitor",
     kicker: "ESP32 real-time display & cloud dashboard",
@@ -201,6 +207,7 @@ export const projects: Project[] = [
   },
   {
     id: "safety",
+    hint: "Tap a worker to take off their helmet.",
     index: "05",
     title: "Site Safety Vision",
     kicker: "PPE & hazard detection from live CCTV",

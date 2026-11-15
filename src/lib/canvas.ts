@@ -23,6 +23,8 @@ export function useCanvasLoop(draw: DrawFn) {
   const ref = useRef<HTMLCanvasElement>(null);
   const drawRef = useRef(draw);
   drawRef.current = draw;
+  // Set inside the effect; lets interactions force a frame (needed under reduced motion).
+  const redrawRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     const canvas = ref.current;
@@ -42,11 +44,15 @@ export function useCanvasLoop(draw: DrawFn) {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       if (reduce || !visible) frame(performance.now());
     };
-    const frame = (now: number) => {
+    let frozenT = 6;
+    const frame = (now: number, live = false) => {
       if (!w || !h) return;
       ctx.clearRect(0, 0, w, h);
-      drawRef.current(ctx, reduce ? 6 : (now - start) / 1000, w, h, palette);
+      const t = reduce && !live ? frozenT : (now - start) / 1000;
+      if (live) frozenT = t;
+      drawRef.current(ctx, t, w, h, palette);
     };
+    redrawRef.current = () => frame(performance.now(), true);
     const loop = (now: number) => {
       frame(now);
       if (visible && !reduce) raf = requestAnimationFrame(loop);
@@ -67,7 +73,13 @@ export function useCanvasLoop(draw: DrawFn) {
     return () => { cancelAnimationFrame(raf); ro.disconnect(); io.disconnect(); mo.disconnect(); };
   }, []);
 
-  return ref;
+  return { ref, redraw: () => redrawRef.current() };
+}
+
+/** Pointer position in CSS pixels relative to the canvas. */
+export function localPoint(e: { clientX: number; clientY: number; currentTarget: Element }) {
+  const r = e.currentTarget.getBoundingClientRect();
+  return { x: e.clientX - r.left, y: e.clientY - r.top, w: r.width, h: r.height };
 }
 
 export function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
