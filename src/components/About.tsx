@@ -1,7 +1,7 @@
 import { GraduationCap, MapPin, Sparkles } from "lucide-react";
 import { education, metrics, profile } from "@/data";
 import { CountUp, Reveal, Section, SectionHead } from "./ui";
-import walk from "@/assets/img/walk.webp";
+import NeuralOrb from "./NeuralOrb";
 
 const stack = ["YOLO11", "U-Net", "PyTorch", "OpenCV", "LangChain", "RAG", "Gemini", "MARL", "GCN-GRU", "LSTM", "FastAPI", "Docker", "ESP32", "TensorFlow"];
 
@@ -40,7 +40,7 @@ export default function About() {
       <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
         <Reveal className="lg:col-span-5">
           <figure className="relative overflow-hidden rounded-[24px] border hairline">
-            <img src={walk} alt="Muhammed Arshad on a marigold-lined path" loading="lazy" className="aspect-[4/5] w-full object-cover" />
+            <NeuralOrb />
           </figure>
         </Reveal>
 
